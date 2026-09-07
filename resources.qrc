@@ -1,0 +1,19 @@
+<RCC>
+    <qresource prefix="/qml">
+        <file>qml/Main.qml</file>
+        <file>qml/components/AppGrid.qml</file>
+        <file>qml/components/Dock.qml</file>
+        <file>qml/components/Spotlight.qml</file>
+    </qresource>
+    <qresource prefix="/resources">
+        <file>qml/resources/images/wallpaper.svg</file>
+        <file>qml/resources/icons/phone.svg</file>
+        <file>qml/resources/icons/messages.svg</file>
+        <file>qml/resources/icons/safari.svg</file>
+        <file>qml/resources/icons/settings.svg</file>
+        <file>qml/resources/icons/dock1.svg</file>
+        <file>qml/resources/icons/dock2.svg</file>
+        <file>qml/resources/icons/dock3.svg</file>
+        <file>qml/resources/icons/dock4.svg</file>
+    </qresource>
+</RCC>

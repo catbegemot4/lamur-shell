@@ -1,5 +1,4 @@
 import QtQuick 2.15
-import QtGraphicalEffects 1.12
 import QtQuick.Controls 2.15
 
 Item {
@@ -21,40 +20,25 @@ Item {
         z: 0
     }
 
-    // Blur effect for glass look
-    ShaderEffectSource {
-        id: bgSource
-        sourceItem: dockBg
-        hideSource: true
-    }
-    GaussianBlur {
-        anchors.fill: dockBg
-        source: bgSource
-        radius: 18
-        samples: 16
-        transparentBorder: true
-        z: 1
-    }
-
     Row {
         anchors.verticalCenter: dockBg.verticalCenter
         anchors.horizontalCenter: dockBg.horizontalCenter
         spacing: 24
 
         Repeater {
-            model: 4
+            model: appModel.getAllApps().filter(function(a){ return a.isDock; })
             Rectangle {
                 width: 56; height: 56
                 radius: 12
                 color: "transparent"
                 Image {
                     anchors.fill: parent
-                    source: "qrc:/icons/dock" + (index+1) + ".svg"
+                    source: modelData.icon
                     fillMode: Image.PreserveAspectFit
                 }
                 MouseArea {
                     anchors.fill: parent
-                    onClicked: console.log("Dock icon", index)
+                    onClicked: appModel.launchApp(model.index)
                 }
             }
         }
