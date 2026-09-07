@@ -4,60 +4,35 @@ import QtQuick.Layouts 1.15
 
 Item {
     id: root
-    property int pageIndex: 0
-
-    // Пример модели. В реальном проекте замените на модель из C++.
-    ListModel {
-        id: appsModel
-        ListElement { name: "Phone"; icon: "qrc:/icons/phone.svg" }
-        ListElement { name: "Messages"; icon: "qrc:/icons/messages.svg" }
-        ListElement { name: "Safari"; icon: "qrc:/icons/safari.svg" }
-        ListElement { name: "Settings"; icon: "qrc:/icons/settings.svg" }
-        // добавьте элементы по необходимости
-    }
+    property var model: undefined
 
     GridView {
         id: grid
         anchors.fill: parent
-        model: appsModel
-        cellWidth: 90
-        cellHeight: 120
-        spacing: 10
-        padding: 16
-        snapMode: GridView.SnapToItem
-        interactive: true
-
+        model: model
         delegate: Item {
-            width: grid.cellWidth
-            height: grid.cellHeight
+            width: 90; height: 120
+
+            property bool jiggle: false
 
             Column {
                 anchors.centerIn: parent
                 spacing: 8
                 width: parent.width
+
                 Image {
                     id: iconImg
-                    source: icon
+                    source: model.icon
                     width: 72; height: 72
                     fillMode: Image.PreserveAspectFit
                     smooth: true
-                    layer.enabled: true
-                    layer.effect: OpacityMask {
-                        maskSource: Rectangle {
-                            width: iconImg.width; height: iconImg.height
-                            radius: 16
-                            color: "white"
-                        }
-                    }
-                    transform: Scale {
-                        id: hoverScale
-                        origin.x: iconImg.width/2; origin.y: iconImg.height/2
-                        xScale: 1.0; yScale: 1.0
-                    }
+                    radius: 16
+                    transform: Rotation { id: rot; origin.x: width/2; origin.y: height/2; angle: jiggle ? (Math.random() > 0.5 ? -3 : 3) : 0 }
+                    Behavior on rotation { NumberAnimation { duration: 120 } }
                 }
 
                 Text {
-                    text: name
+                    text: model.name
                     font.pixelSize: 12
                     color: "#111"
                     horizontalAlignment: Text.AlignHCenter
@@ -67,19 +42,32 @@ Item {
 
                 MouseArea {
                     anchors.fill: parent
+                    acceptedButtons: Qt.LeftButton
+                    property int pressTimerId: -1
                     onPressed: {
-                        hoverScale.xScale = 0.95; hoverScale.yScale = 0.95
+                        pressTimerId = Qt.createQmlObject('import QtQuick 2.0; Timer { interval: 350; repeat: false }', parent)
+                        pressTimerId.running = true
+                        pressTimerId.triggered.connect(function(){
+                            // start jiggle
+                            parent.jiggle = true
+                        })
                     }
                     onReleased: {
-                        hoverScale.xScale = 1.0; hoverScale.yScale = 1.0
-                        console.log("Launch app:", name)
-                        // Здесь можно вызвать сигнал/метод для запуска приложения
+                        if (parent.jiggle) {
+                            parent.jiggle = false
+                        } else {
+                            // normal tap -> launch
+                            appModel.launchApp(index)
+                        }
                     }
                 }
             }
-
-            Behavior on x { NumberAnimation { duration: 300; easing.type: Easing.OutCubic } }
-            Behavior on y { NumberAnimation { duration: 300; easing.type: Easing.OutCubic } }
         }
+
+        cellWidth: 90
+        cellHeight: 120
+        spacing: 10
+        padding: 16
+        snapMode: GridView.SnapToItem
     }
 }

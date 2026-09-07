@@ -9,20 +9,37 @@ Window {
     visible: true
     width: 390
     height: 844
-    color: "#f2f2f7" // light iOS background
+    color: theme === "dark" ? "#0b0b0f" : "#f2f2f7"
 
-    // Status bar
-    Rectangle {
-        id: statusBar
+    property string theme: "light"
+
+    // top bar with search and theme
+    Row {
         anchors.top: parent.top
-        height: 44
-        width: parent.width
-        color: "transparent"
-        Row {
+        anchors.left: parent.left
+        anchors.right: parent.right
+        height: 56
+        spacing: 8
+        padding: 8
+
+        TextField {
+            id: searchField
+            placeholderText: "Search"
             anchors.verticalCenter: parent.verticalCenter
-            anchors.horizontalCenter: parent.horizontalCenter
-            spacing: 12
-            Text { text: "9:41"; font.pixelSize: 16; color: "#111" }
+            onTextChanged: searchResultsModel.model = appModel.search(text)
+            width: parent.width * 0.7
+        }
+
+        Button {
+            text: theme === "dark" ? "Light" : "Dark"
+            anchors.verticalCenter: parent.verticalCenter
+            onClicked: theme = theme === "dark" ? "light" : "dark"
+        }
+
+        Button {
+            text: "Save"
+            anchors.verticalCenter: parent.verticalCenter
+            onClicked: appModel.save()
         }
     }
 
@@ -30,14 +47,20 @@ Window {
     Image {
         id: wallpaper
         anchors.fill: parent
-        source: "qrc:/images/wallpaper.svg" // замените на вашу
+        source: "qrc:/resources/images/wallpaper.svg"
         fillMode: Image.PreserveAspectCrop
+        opacity: theme === "dark" ? 0.6 : 1.0
     }
+
+    // Spotlight area (search results)
+    ListModel { id: searchResultsModel }
+    Spotlight { id: spotlight; visible: searchResultsModel.count > 0; model: searchResultsModel }
 
     // PageView for multiple home pages
     PageView {
         id: pages
-        anchors.top: statusBar.bottom
+        anchors.top: parent.top
+        anchors.topMargin: 56
         anchors.bottom: dock.top
         anchors.left: parent.left
         anchors.right: parent.right
@@ -46,10 +69,9 @@ Window {
 
         AppGrid {
             id: page0
-            pageIndex: 0
             anchors.fill: parent
+            model: appModel
         }
-        // Доп. страницы можно добавить здесь
     }
 
     // Dock at the bottom
@@ -62,11 +84,4 @@ Window {
         y: parent.height - height - 20
     }
 
-    // Placeholder for gestures
-    MultiPointTouchArea {
-        anchors.fill: parent
-        onReleased: {
-            // обработка жестов (Spotlight, Control Center) — по необходимости
-        }
-    }
 }
